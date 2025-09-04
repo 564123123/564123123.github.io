@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>枫香派出所值班表</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Microsoft YaHei", "SimHei", sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #0d3aa9 0%, #1a56db 100%);
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            margin: 20px 0;
+            border: 3px solid #ffd700;
+        }
+        
+        .header {
+            background: #0d3aa9;
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 3px solid #ffd700;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .date-display {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 5px 0;
+            color: #ffd700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .duty-table {
+            width: 100%;
+        }
+        
+        .duty-row {
+            display: flex;
+            border-bottom: 2px solid #ffd700;
+        }
+        
+        .duty-row:last-child {
+            border-bottom: 2px solid #ffd700;
+        }
+        
+        .duty-label {
+            width: 30%;
+            padding: 25px 20px;
+            background: #e6effd;
+            font-size: 1.6rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-right: 2px solid #ffd700;
+            position: relative;
+        }
+        
+        .police-badge {
+            position: absolute;
+            left: 15px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1a56db 0%, #0d3aa9 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffd700;
+            font-size: 20px;
+            font-weight: bold;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .duty-value {
+            width: 70%;
+            padding: 25px 30px;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            font-weight: bold;
+            color: #0d3aa9;
+            border-left: 2px solid #ffd700;
+        }
+        
+        .phone-number {
+            font-size: 1.6rem;
+            color: #0d3aa9;
+            margin-left: 15px;
+            font-weight: bold;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .date-selector {
+            padding: 12px 20px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 6px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #0d3aa9;
+        }
+        
+        .date-selector:hover {
+            background: #0d3aa9;
+            color: white;
+        }
+        
+        button.date-selector {
+            background: #ffd700;
+            color: #0d3aa9;
+            font-weight: bold;
+        }
+        
+        button.date-selector:hover {
+            background: #0d3aa9;
+            color: #ffd700;
+        }
+        
+        .fullscreen-btn {
+            padding: 12px 20px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 6px;
+            background: #0d3aa9;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #ffd700;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .fullscreen-btn:hover {
+            background: #ffd700;
+            color: #0d3aa9;
+        }
+        
+        .footer {
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            width: 100%;
+        }
+        
+        .footer p {
+            margin: 5px 0;
+        }
+        
+        .time-error {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .date-display {
+                font-size: 1.6rem;
+            }
+            
+            .duty-label, .duty-value {
+                font-size: 1.3rem;
+                padding: 20px 15px;
+            }
+            
+            .phone-number {
+                font-size: 1.3rem;
+            }
+            
+            .police-badge {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .date-display {
+                font-size: 1.3rem;
+            }
+            
+            .duty-label, .duty-value {
+                font-size: 1.1rem;
+                padding: 15px 10px;
+            }
+            
+            .phone-number {
+                font-size: 1.1rem;
+                margin-left: 8px;
+            }
+            
+            .police-badge {
+                width: 30px;
+                height: 30px;
+                font-size: 16px;
+                left: 10px;
+            }
+            
+            .duty-row {
+                flex-direction: column;
+            }
+            
+            .duty-label, .duty-value {
+                width: 100%;
+                justify-content: center;
+                border-right: none;
+                border-left: none;
+            }
+            
+            .duty-label {
+                padding: 12px 10px;
+                justify-content: center;
+                border-bottom: 2px solid #ffd700;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>遵义市公安局播州分局枫香派出所</h1>
+            <div class="date-display" id="currentDate">2025年9月2日值班表</div>
+        </div>
+        
+        <div class="duty-table">
+            <div class="duty-row">
+                <div class="duty-label">
+                    <div class="police-badge">警</div>
+                    值班领导
+                </div>
+                <div class="duty-value" id="leader">郑周全 <span class="phone-number">18166931001</span></div>
+            </div>
+            <div class="duty-row">
+                <div class="duty-label">
+                    <div class="police-badge">警</div>
+                    值班民警
+                </div>
+                <div class="duty-value" id="officer">刘文武 <span class="phone-number">18892419369</span></div>
+            </div>
+            <div class="duty-row">
+                <div class="duty-label">
+                    <div class="police-badge">警</div>
+                    正班辅警
+                </div>
+                <div class="duty-value" id="fullTimeAssistant">张佑强、熊仕文、肖启顺</div>
+            </div>
+            <div class="duty-row">
+                <div class="duty-label">
+                    <div class="police-badge">警</div>
+                    备勤辅警
+                </div>
+                <div class="duty-value" id="standbyAssistant">何庚云、罗安宇、熊仕东、苏攀</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <input type="date" class="date-selector" id="datePicker" value="2025-09-02">
+        <button class="date-selector" onclick="showToday()">显示今日</button>
+        <button class="fullscreen-btn" onclick="toggleFullScreen()">全屏显示</button>
+    </div>
+    
+    <div class="footer">
+        <p>系统时间: <span id="liveClock"></span></p>
+        <p class="time-error" id="timeError" style="display: none;">时间获取失败，请检查设备时间设置</p>
+        <p>© 2025 遵义市公安局播州分局枫香派出所</p>
+        <p>为人民服务 · 保一方平安</p>
+    </div>
+
+    <script>
+        // 起始日期 - 2025年9月1日（周一）
+        const START_DATE = new Date(2025, 8, 1); // 月份从0开始，所以8代表9月
+        
+        // 值班领导数据
+        const LEADERS = [
+            { name: "郑周全", phone: "18166931001" },
+            { name: "姚龙科", phone: "15338528388" },
+            { name: "黄平平", phone: "18166930202" }
+        ];
+        
+        // 值班民警数据（固定顺序）
+        const OFFICERS = [
+            { name: "鲁金林", phone: "15508526178" },
+            { name: "刘文武", phone: "18892419369" },
+            { name: "陈锐", phone: "18166960609" },
+            { name: "黄平平", phone: "18166930202" },
+            { name: "唐远艳", phone: "18212188730" },
+            { name: "李鑫", phone: "18166930638" }
+        ];
+        
+        // 辅警分组数据
+        const ASSISTANT_GROUPS = [
+            { // 一组
+                name: "一组",
+                members: ["何庚云", "罗安宇", "熊仕东", "苏攀"]
+            },
+            { // 二组
+                name: "二组",
+                members: ["张佑强", "熊仕文", "肖启顺"]
+            },
+            { // 三组
+                name: "三组",
+                members: ["刘小涛", "潘腾辉", "郑旭华"]
+            }
+        ];
+        
+        // 辅警初始状态（2025年9月1日）
+        // 正班: 二组, 备勤: 一组
+        const INITIAL_ASSISTANT_STATE = {
+            fullTime: 1, // 二组
+            standby: 0   // 一组
+        };
+        
+        // 计算从起始日期到目标日期的天数差
+        function getDaysDiff(targetDate) {
+            const start = new Date(START_DATE);
+            start.setHours(0, 0, 0, 0);
+            
+            const target = new Date(targetDate);
+            target.setHours(0, 0, 0, 0);
+            
+            // 计算相差的毫秒数
+            const diffTime = target - start;
+            
+            // 转换为天数
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            return diffDays;
+        }
+        
+        // 获取值班领导（基于天数差）
+        function getLeader(daysDiff) {
+            const weeksDiff = Math.floor(daysDiff / 7);
+            const leaderIndex = (weeksDiff % LEADERS.length + LEADERS.length) % LEADERS.length;
+            return LEADERS[leaderIndex];
+        }
+        
+        // 获取值班民警（基于天数差和星期几）
+        function getOfficer(daysDiff, dayOfWeek) {
+            // 计算基础索引
+            let baseIndex = daysDiff % 7;
+            
+            // 特殊处理周末
+            if (dayOfWeek === 6 || dayOfWeek === 0) {
+                baseIndex = (daysDiff + (6 - (daysDiff % 7))) % 7;
+            }
+            
+            // 映射到民警数组
+            const officerMapping = [
+                0, // 周一: 鲁金林
+                1, // 周二: 刘文武
+                2, // 周三: 陈锐
+                3, // 周四: 黄平平
+                4, // 周五: 唐远艳
+                5, // 周六: 李鑫
+                5  // 周日: 李鑫
+            ];
+            
+            // 计算偏移量
+            const offset = Math.floor(daysDiff / 7) % OFFICERS.length;
+            
+            // 计算最终索引
+            let officerIndex = (officerMapping[baseIndex] + offset) % OFFICERS.length;
+            if (officerIndex < 0) officerIndex += OFFICERS.length;
+            
+            return OFFICERS[officerIndex];
+        }
+        
+        // 获取辅警排班（基于天数差）
+        function getAssistants(daysDiff) {
+            // 每6天一个完整循环（2天正班 + 2天备勤 + 2天休息）
+            const cycleDay = daysDiff % 6;
+            
+            // 根据循环天数确定状态
+            let fullTimeGroup, standbyGroup;
+            
+            if (cycleDay < 2) {
+                // 9月1-2日模式：正班二组，备勤一组
+                fullTimeGroup = 1; // 二组
+                standbyGroup = 0;  // 一组
+            } else if (cycleDay < 4) {
+                // 9月3-4日模式：正班三组，备勤二组
+                fullTimeGroup = 2; // 三组
+                standbyGroup = 1;  // 二组
+            } else {
+                // 9月5-6日模式：正班一组，备勤三组
+                fullTimeGroup = 0; // 一组
+                standbyGroup = 2;  // 三组
+            }
+            
+            return {
+                fullTime: ASSISTANT_GROUPS[fullTimeGroup],
+                standby: ASSISTANT_GROUPS[standbyGroup]
+            };
+        }
+        
+        // 更新日期显示
+        function updateDate(selectedDate = null) {
+            try {
+                let date;
+                if (selectedDate) {
+                    date = new Date(selectedDate);
+                } else {
+                    date = new Date();
+                }
+                
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                document.getElementById('currentDate').textContent = `${year}年${month}月${day}日值班表`;
+                
+                return {
+                    date: date,
+                    day: date.getDay()
+                };
+            } catch (error) {
+                console.error("日期更新错误:", error);
+                document.getElementById('timeError').style.display = 'block';
+                const now = new Date();
+                return {
+                    date: now,
+                    day: now.getDay()
+                };
+            }
+        }
+        
+        // 更新值班信息
+        function updateDutyInfo(dateInfo) {
+            try {
+                const { date, day } = dateInfo;
+                
+                // 计算天数差
+                const daysDiff = getDaysDiff(date);
+                
+                // 获取值班领导
+                const leader = getLeader(daysDiff);
+                
+                // 获取值班民警
+                const officer = getOfficer(daysDiff, day);
+                
+                // 获取辅警数据
+                const assistants = getAssistants(daysDiff);
+                
+                // 更新页面内容
+                document.getElementById('leader').innerHTML = `${leader.name} <span class="phone-number">${leader.phone}</span>`;
+                document.getElementById('officer').innerHTML = `${officer.name} <span class="phone-number">${officer.phone}</span>`;
+                document.getElementById('fullTimeAssistant').textContent = assistants.fullTime.members.join('、');
+                document.getElementById('standbyAssistant').textContent = assistants.standby.members.join('、');
+                
+            } catch (error) {
+                console.error("更新值班信息错误:", error);
+            }
+        }
+        
+        // 显示今日值班信息
+        function showToday() {
+            try {
+                // 重置日期选择器为今日
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                document.getElementById('datePicker').value = `${year}-${month}-${day}`;
+                
+                const dateInfo = updateDate();
+                updateDutyInfo(dateInfo);
+            } catch (error) {
+                console.error("显示今日错误:", error);
+                document.getElementById('timeError').style.display = 'block';
+            }
+        }
+        
+        // 实时时钟
+        function updateClock() {
+            try {
+                const now = new Date();
+                
+                // 验证日期对象是否有效
+                if (isNaN(now.getTime())) {
+                    throw new Error("无效的日期对象");
+                }
+                
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                
+                const timeStr = `${hours}:${minutes}:${seconds}`;
+                document.getElementById('liveClock').textContent = timeStr;
+                document.getElementById('timeError').style.display = 'none';
+            } catch (error) {
+                console.error("时间更新错误:", error);
+                document.getElementById('liveClock').textContent = "--:--:--";
+                document.getElementById('timeError').style.display = 'block';
+            }
+        }
+        
+        // 全屏显示功能
+        function toggleFullScreen() {
+            try {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log(`全屏请求错误: ${err.message}`);
+                    });
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            } catch (error) {
+                console.error("全屏切换错误:", error);
+            }
+        }
+        
+        // 页面加载时初始化
+        window.onload = function() {
+            try {
+                // 设置日期选择器默认值为今天
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                document.getElementById('datePicker').value = `${year}-${month}-${day}`;
+                
+                const dateInfo = updateDate();
+                updateDutyInfo(dateInfo);
+                updateClock();
+                
+                // 设置时钟更新间隔
+                setInterval(updateClock, 1000);
+                
+                // 添加日期选择事件监听
+                document.getElementById('datePicker').addEventListener('change', function() {
+                    const selectedDate = this.value;
+                    const dateInfo = updateDate(selectedDate);
+                    updateDutyInfo(dateInfo);
+                });
+            } catch (error) {
+                console.error("页面初始化错误:", error);
+                document.getElementById('timeError').style.display = 'block';
+                document.getElementById('liveClock').textContent = "--:--:--";
+            }
+        };
+    </script>
+</body>
+</html>
