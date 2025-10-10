@@ -325,8 +325,11 @@
     </div>
 
     <script>
-        // 起始日期 - 2025年10月10日（周四）
-        const START_DATE = new Date(2025, 9, 10); // 月份从0开始，所以9代表10月
+        // 起始日期 - 2025年9月1日（周一）
+        const START_DATE = new Date(2025, 8, 1); // 月份从0开始，所以8代表9月
+        
+        // 辅警起始日期 - 2025年10月10日（周四）
+        const ASSISTANT_START_DATE = new Date(2025, 9, 10); // 月份从0开始，所以9代表10月
         
         // 值班领导数据
         const LEADERS = [
@@ -362,8 +365,8 @@
         ];
         
         // 计算从起始日期到目标日期的天数差
-        function getDaysDiff(targetDate) {
-            const start = new Date(START_DATE);
+        function getDaysDiff(targetDate, startDate) {
+            const start = new Date(startDate);
             start.setHours(0, 0, 0, 0);
             
             const target = new Date(targetDate);
@@ -479,17 +482,20 @@
             try {
                 const { date, day } = dateInfo;
                 
-                // 计算天数差
-                const daysDiff = getDaysDiff(date);
+                // 计算天数差 - 民警使用9月1日作为起始
+                const officerDaysDiff = getDaysDiff(date, START_DATE);
+                
+                // 计算天数差 - 辅警使用10月10日作为起始
+                const assistantDaysDiff = getDaysDiff(date, ASSISTANT_START_DATE);
                 
                 // 获取值班领导
-                const leader = getLeader(daysDiff);
+                const leader = getLeader(officerDaysDiff);
                 
                 // 获取值班民警
-                const officer = getOfficer(daysDiff, day);
+                const officer = getOfficer(officerDaysDiff, day);
                 
                 // 获取辅警数据
-                const assistants = getAssistants(daysDiff);
+                const assistants = getAssistants(assistantDaysDiff);
                 
                 // 更新页面内容
                 document.getElementById('leader').innerHTML = `${leader.name} <span class="phone-number">${leader.phone}</span>`;
@@ -544,7 +550,7 @@
             }
         }
         
-        // 全屏显示功能
+        * // 全屏显示功能
         function toggleFullScreen() {
             try {
                 if (!document.fullscreenElement) {
@@ -562,7 +568,7 @@
         }
         
         // 页面加载时初始化
-        window.onload = function() {
+window.onload = function() {
             try {
                 // 设置日期选择器默认值为今天
                 const today = new Date();
@@ -584,7 +590,7 @@
                     const dateInfo = updateDate(selectedDate);
                     updateDutyInfo(dateInfo);
                 });
-} catch (error) {
+            } catch (error) {
                 console.error("页面初始化错误:", error);
                 document.getElementById('timeError').style.display = 'block';
                 document.getElementById('liveClock').textContent = "--:--:--";
