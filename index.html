@@ -276,7 +276,7 @@
     <div class="container">
         <div class="header">
             <h1>遵义市公安局播州分局枫香派出所</h1>
-            <div class="date-display" id="currentDate">2025年9月2日值班表</div>
+            <div class="date-display" id="currentDate">2025年10月10日值班表</div>
         </div>
         
         <div class="duty-table">
@@ -292,7 +292,7 @@
                     <div class="police-badge">警</div>
                     值班民警
                 </div>
-                <div class="duty-value" id="officer">刘文武 <span class="phone-number">18892419369</span></div>
+                <div class="duty-value" id="officer">鲁金林 <span class="phone-number">15508526178</span></div>
             </div>
             <div class="duty-row">
                 <div class="duty-label">
@@ -312,7 +312,7 @@
     </div>
     
     <div class="controls">
-        <input type="date" class="date-selector" id="datePicker" value="2025-09-02">
+        <input type="date" class="date-selector" id="datePicker" value="2025-10-10">
         <button class="date-selector" onclick="showToday()">显示今日</button>
         <button class="fullscreen-btn" onclick="toggleFullScreen()">全屏显示</button>
     </div>
@@ -325,8 +325,8 @@
     </div>
 
     <script>
-        // 起始日期 - 2025年9月1日（周一）
-        const START_DATE = new Date(2025, 8, 1); // 月份从0开始，所以8代表9月
+        // 起始日期 - 2025年10月10日（周四）
+        const START_DATE = new Date(2025, 9, 10); // 月份从0开始，所以9代表10月
         
         // 值班领导数据
         const LEADERS = [
@@ -360,13 +360,6 @@
                 members: ["刘小涛", "潘腾辉", "郑旭华"]
             }
         ];
-        
-        // 辅警初始状态（2025年9月1日）
-        // 正班: 二组, 备勤: 一组
-        const INITIAL_ASSISTANT_STATE = {
-            fullTime: 1, // 二组
-            standby: 0   // 一组
-        };
         
         // 计算从起始日期到目标日期的天数差
         function getDaysDiff(targetDate) {
@@ -432,15 +425,15 @@
             let fullTimeGroup, standbyGroup;
             
             if (cycleDay < 2) {
-                // 9月1-2日模式：正班二组，备勤一组
+                // 10月10-11日模式：正班二组，备勤一组
                 fullTimeGroup = 1; // 二组
                 standbyGroup = 0;  // 一组
             } else if (cycleDay < 4) {
-                // 9月3-4日模式：正班三组，备勤二组
+                // 10月12-13日模式：正班三组，备勤二组
                 fullTimeGroup = 2; // 三组
                 standbyGroup = 1;  // 二组
             } else {
-                // 9月5-6日模式：正班一组，备勤三组
+                // 10月14-15日模式：正班一组，备勤三组
                 fullTimeGroup = 0; // 一组
                 standbyGroup = 2;  // 三组
             }
@@ -591,7 +584,7 @@
                     const dateInfo = updateDate(selectedDate);
                     updateDutyInfo(dateInfo);
                 });
-            } catch (error) {
+} catch (error) {
                 console.error("页面初始化错误:", error);
                 document.getElementById('timeError').style.display = 'block';
                 document.getElementById('liveClock').textContent = "--:--:--";
