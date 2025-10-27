@@ -6,19 +6,19 @@
     <title>枫香派出所值班表</title>
     <style>
         * {
-            边距：0;
-            
-            盒模型：边框盒;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        身体 {
-            字体："微软 YaHei"，"黑体"，无衬线;
-            显示：伸缩;
-            弹性方向： 列;
-            文本对齐：居中;
-            对齐项目：居中;
-            最小高度：100vh;
-            
+        body {
+            font-family: "Microsoft YaHei", "SimHei", sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
             background: linear-gradient(135deg, #0d3aa9 0%, #1a56db 100%);
             color: #333;
         }
@@ -29,22 +29,22 @@
             background: white;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-            溢出：隐藏;
-            边距：20像素 0;
-            边框：3像素 实线 #ffd700;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 3px solid #ffd700;
         }
         
-        .标题 {
-            背景: #0d3aa9;
-            颜色：白色;
-             
-            文本对齐：居中;
-            下边框：3像素 实线#ffd700;
+        .header {
+            background: #0d3aa9;
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 3px solid #ffd700;
         }
         
-        .标题 h1 {
-            字体大小：2.5rem;
-            字体粗细：粗体;
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
             margin-bottom: 10px;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
         }
@@ -54,11 +54,11 @@
             font-weight: bold;
             margin: 5px 0;
             color: #ffd700;
-            文本阴影：1像素 1像素 2像素  rgba（0，0，0，0.5）;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
         
-        . duty-table  {
-            宽度：100%;
+        .duty-table {
+            width: 100%;
         }
         
         .duty-row {
@@ -335,24 +335,24 @@
         const LEADERS = [
             { name: "黄平平", phone: "18166930202" },
             { name: "姚龙科", phone: "15338528388" },
-            { name: "李鑫", phone: "18166930638" }
+            { name: "李    鑫", phone: "18166930638"}
         ];
         
         // 值班民警数据（固定顺序）
         const OFFICERS = [
             { name: "鲁金林", phone: "15508526178" },
             { name: "刘文武", phone: "18892419369" },
-            { name: "陈锐", phone: "18166960609" },
+            { name: "陈    锐", phone: "18166960609" },
             { name: "黄平平", phone: "18166930202" },
             { name: "唐远艳", phone: "18212188730" },
-            { name: "李鑫", phone: "18166930638" }
+            { name: "李    鑫", phone: "18166930638" }
         ];
         
         // 辅警分组数据
         const ASSISTANT_GROUPS = [
             { // 一组
                 name: "一组",
-                members: ["何庚云", "罗安宇", "熊仕东", "苏攀"]
+                members: ["何庚云", "罗安宇", "熊仕东", "苏    攀"]
             },
             { // 二组
                 name: "二组",
@@ -599,4 +599,3 @@
     </script>
 </body>
 </html>
-
