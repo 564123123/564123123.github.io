@@ -341,9 +341,9 @@
         // 值班民警数据（固定顺序）
         const OFFICERS = [
             { name: "鲁金林", phone: "15508526178" },
-            { name: "刘文武", phone: "18892419369" },
-            { name: "陈    锐", phone: "18166960609" },
             { name: "黄平平", phone: "18166930202" },
+            { name: "陈    锐", phone: "18166960609" },
+            { name: "刘文武", phone: "18892419369" },
             { name: "唐远艳", phone: "18212188730" },
             { name: "李    鑫", phone: "18166930638" }
         ];
@@ -364,6 +364,16 @@
             }
         ];
         
+        // 值班领导映射规则（根据本周六值班民警确定本周值班领导）
+        const LEADER_MAPPING = {
+            '黄平平': '黄平平',    // 周六值班民警黄平平 -> 值班领导黄平平
+            '唐远艳': '黄平平',    // 周六值班民警唐远艳 -> 值班领导黄平平
+            '刘文武': '姚龙科',    // 周六值班民警刘文武 -> 值班领导姚龙科
+            '鲁金林': '姚龙科',    // 周六值班民警鲁金林 -> 值班领导姚龙科
+            '李鑫': '李鑫',        // 周六值班民警李鑫 -> 值班领导李鑫
+            '陈锐': '李鑫'         // 周六值班民警陈锐 -> 值班领导李鑫
+        };
+        
         // 计算从起始日期到目标日期的天数差
         function getDaysDiff(targetDate, startDate) {
             const start = new Date(startDate);
@@ -381,11 +391,55 @@
             return diffDays;
         }
         
-        // 获取值班领导（基于天数差）
-        function getLeader(daysDiff) {
-            const weeksDiff = Math.floor(daysDiff / 7);
-            const leaderIndex = (weeksDiff % LEADERS.length + LEADERS.length) % LEADERS.length;
-            return LEADERS[leaderIndex];
+        // 获取本周的周一（一周的开始）
+        function getWeekMonday(targetDate) {
+            const date = new Date(targetDate);
+            const dayOfWeek = date.getDay(); // 0=周日, 1=周一, ..., 6=周六
+            
+            // 计算到本周一的天数差
+            let daysToMonday = 1 - dayOfWeek;
+            if (daysToMonday > 0) {
+                daysToMonday -= 7; // 如果是周日，需要减去7天
+            }
+            
+            const monday = new Date(date);
+            monday.setDate(date.getDate() + daysToMonday);
+            return monday;
+        }
+        
+        // 获取本周的周六（基于周一到周日的周期）
+        function getWeekSaturday(targetDate) {
+            // 先获取本周的周一
+            const monday = getWeekMonday(targetDate);
+            
+            // 周六 = 周一 + 5天
+            const saturday = new Date(monday);
+            saturday.setDate(monday.getDate() + 5);
+            
+            return saturday;
+        }
+        
+        // 获取值班领导（基于本周六的值班民警）
+        function getLeader(date) {
+            // 获取本周六的日期（基于周一到周日的周期）
+            const saturdayDate = getWeekSaturday(date);
+            
+            // 计算从起始日期到本周六的天数差
+            const saturdayDaysDiff = getDaysDiff(saturdayDate, START_DATE);
+            
+            // 获取本周六的值班民警
+            const saturdayOfficer = getOfficer(saturdayDaysDiff, 6); // 6表示周六
+            
+            // 获取民警姓名（去掉空格）
+            const officerName = saturdayOfficer.name.replace(/\s+/g, '');
+            
+            // 根据规则映射到值班领导
+            let leaderName = LEADER_MAPPING[officerName] || '黄平平';
+            
+            // 在LEADERS数组中查找对应的领导
+            const leader = LEADERS.find(l => l.name.replace(/\s+/g, '') === leaderName);
+            
+            return leader || LEADERS[0];
         }
         
         // 获取值班民警（基于天数差和星期几）
@@ -488,8 +542,8 @@
                 // 计算天数差 - 辅警使用10月10日作为起始
                 const assistantDaysDiff = getDaysDiff(date, ASSISTANT_START_DATE);
                 
-                // 获取值班领导
-                const leader = getLeader(officerDaysDiff);
+                // 获取值班领导（根据本周六值班民警确定）
+                const leader = getLeader(date);
                 
                 // 获取值班民警
                 const officer = getOfficer(officerDaysDiff, day);
@@ -588,7 +642,7 @@
                 document.getElementById('datePicker').addEventListener('change', function() {
                     const selectedDate = this.value;
                     const dateInfo = updateDate(selectedDate);
-                    updateDutyInfo(dateInfo);
+updateDutyInfo(dateInfo);
                 });
             } catch (error) {
                 console.error("页面初始化错误:", error);
