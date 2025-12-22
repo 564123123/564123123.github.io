@@ -276,7 +276,7 @@
     <div class="container">
         <div class="header">
             <h1>遵义市公安局播州分局枫香派出所</h1>
-            <div class="date-display" id="currentDate">2025年10月10日值班表</div>
+            <div class="date-display" id="currentDate">2025年12月22日值班表</div>
         </div>
         
         <div class="duty-table">
@@ -285,14 +285,14 @@
                     <div class="police-badge">警</div>
                     值班领导
                 </div>
-                <div class="duty-value" id="leader">黄平平 <span class="phone-number">18166930202</span></div>
+                <div class="duty-value" id="leader">郑周全 <span class="phone-number">18166931001</span></div>
             </div>
             <div class="duty-row">
                 <div class="duty-label">
                     <div class="police-badge">警</div>
                     值班民警
                 </div>
-                <div class="duty-value" id="officer">鲁金林 <span class="phone-number">15508526178</span></div>
+                <div class="duty-value" id="officer">李鑫 <span class="phone-number">18166930638</span></div>
             </div>
             <div class="duty-row">
                 <div class="duty-label">
@@ -312,7 +312,7 @@
     </div>
     
     <div class="controls">
-        <input type="date" class="date-selector" id="datePicker" value="2025-10-10">
+        <input type="date" class="date-selector" id="datePicker" value="2025-12-22">
         <button class="date-selector" onclick="showToday()">显示今日</button>
         <button class="fullscreen-btn" onclick="toggleFullScreen()">全屏显示</button>
     </div>
@@ -325,34 +325,36 @@
     </div>
 
     <script>
-        // 起始日期 - 2025年9月1日（周一）
+        // 起始日期 - 2025年9月1日（周一）- 仅用于值班领导排班
         const START_DATE = new Date(2025, 8, 1); // 月份从0开始，所以8代表9月
         
         // 辅警起始日期 - 2025年10月10日（周四）
         const ASSISTANT_START_DATE = new Date(2025, 9, 10); // 月份从0开始，所以9代表10月
         
+        // 新民警排班起始日期 - 2025年12月22日（周一）
+        const OFFICER_NEW_START_DATE = new Date(2025, 11, 22); // 月份从0开始，所以11代表12月
+        
         // 值班领导数据
         const LEADERS = [
-            { name: "黄平平", phone: "18166930202" },
+            { name: "李鑫", phone: "18166930638" },
             { name: "姚龙科", phone: "15338528388" },
-            { name: "李    鑫", phone: "18166930638"}
+            { name: "黄平平", phone: "18166930202" }
         ];
         
-        // 值班民警数据（固定顺序）
+        // 值班民警数据（新排班，5人轮换）
         const OFFICERS = [
             { name: "鲁金林", phone: "15508526178" },
             { name: "黄平平", phone: "18166930202" },
-            { name: "陈    锐", phone: "18166960609" },
-            { name: "刘文武", phone: "18892419369" },
+            { name: "陈锐", phone: "18166960609" },
             { name: "唐远艳", phone: "18212188730" },
-            { name: "李    鑫", phone: "18166930638" }
+            { name: "李鑫", phone: "18166930638" }
         ];
         
         // 辅警分组数据
         const ASSISTANT_GROUPS = [
             { // 一组
                 name: "一组",
-                members: ["何庚云", "罗安宇", "熊仕东", "苏    攀"]
+                members: ["何庚云", "罗安宇", "熊仕东", "苏攀"]
             },
             { // 二组
                 name: "二组",
@@ -363,16 +365,6 @@
                 members: ["刘小涛", "潘腾辉", "郑旭华"]
             }
         ];
-        
-        // 值班领导映射规则（根据本周六值班民警确定本周值班领导）
-        const LEADER_MAPPING = {
-            '黄平平': '黄平平',    // 周六值班民警黄平平 -> 值班领导黄平平
-            '唐远艳': '黄平平',    // 周六值班民警唐远艳 -> 值班领导黄平平
-            '刘文武': '姚龙科',    // 周六值班民警刘文武 -> 值班领导姚龙科
-            '鲁金林': '姚龙科',    // 周六值班民警鲁金林 -> 值班领导姚龙科
-            '李鑫': '李鑫',        // 周六值班民警李鑫 -> 值班领导李鑫
-            '陈锐': '李鑫'         // 周六值班民警陈锐 -> 值班领导李鑫
-        };
         
         // 计算从起始日期到目标日期的天数差
         function getDaysDiff(targetDate, startDate) {
@@ -391,89 +383,87 @@
             return diffDays;
         }
         
-        // 获取本周的周一（一周的开始）
-        function getWeekMonday(targetDate) {
-            const date = new Date(targetDate);
-            const dayOfWeek = date.getDay(); // 0=周日, 1=周一, ..., 6=周六
-            
-            // 计算到本周一的天数差
-            let daysToMonday = 1 - dayOfWeek;
-            if (daysToMonday > 0) {
-                daysToMonday -= 7; // 如果是周日，需要减去7天
-            }
-            
-            const monday = new Date(date);
-            monday.setDate(date.getDate() + daysToMonday);
-            return monday;
+        // 获取值班领导（基于天数差，沿用原逻辑）
+        function getLeader(daysDiff) {
+            const weeksDiff = Math.floor(daysDiff / 7);
+            const leaderIndex = (weeksDiff % LEADERS.length + LEADERS.length) % LEADERS.length;
+            return LEADERS[leaderIndex];
         }
         
-        // 获取本周的周六（基于周一到周日的周期）
-        function getWeekSaturday(targetDate) {
-            // 先获取本周的周一
-            const monday = getWeekMonday(targetDate);
+        // 获取值班民警（新排班逻辑，5人轮换）
+        function getOfficer(targetDate) {
+            // 计算从新起始日期到目标日期的天数差
+            const daysDiff = getDaysDiff(targetDate, OFFICER_NEW_START_DATE);
             
-            // 周六 = 周一 + 5天
-            const saturday = new Date(monday);
-            saturday.setDate(monday.getDate() + 5);
+            // 计算周数差
+            const weeksDiff = Math.floor(daysDiff / 7);
             
-            return saturday;
-        }
-        
-        // 获取值班领导（基于本周六的值班民警）
-        function getLeader(date) {
-            // 获取本周六的日期（基于周一到周日的周期）
-            const saturdayDate = getWeekSaturday(date);
+            // 获取目标日期的星期几（0-6，0代表星期日）
+            const dayOfWeek = targetDate.getDay();
             
-            // 计算从起始日期到本周六的天数差
-            const saturdayDaysDiff = getDaysDiff(saturdayDate, START_DATE);
-            
-            // 获取本周六的值班民警
-            const saturdayOfficer = getOfficer(saturdayDaysDiff, 6); // 6表示周六
-            
-            // 获取民警姓名（去掉空格）
-            const officerName = saturdayOfficer.name.replace(/\s+/g, '');
-            
-            // 根据规则映射到值班领导
-            let leaderName = LEADER_MAPPING[officerName] || '黄平平';
-            
-            // 在LEADERS数组中查找对应的领导
-            const leader = LEADERS.find(l => l.name.replace(/\s+/g, '') === leaderName);
-            
-            return leader || LEADERS[0];
-        }
-        
-        // 获取值班民警（基于天数差和星期几）
-        function getOfficer(daysDiff, dayOfWeek) {
-            // 计算基础索引
-            let baseIndex = daysDiff % 7;
-            
-            // 特殊处理周末
-            if (dayOfWeek === 6 || dayOfWeek === 0) {
-                baseIndex = (daysDiff + (6 - (daysDiff % 7))) % 7;
-            }
-            
-            // 映射到民警数组
-            const officerMapping = [
-                0, // 周一: 鲁金林
-                1, // 周二: 刘文武
-                2, // 周三: 陈锐
-                3, // 周四: 黄平平
-                4, // 周五: 唐远艳
-                5, // 周六: 李鑫
-                5  // 周日: 李鑫
+            // 定义每周的排班模板
+            // 星期一: 0, 星期二: 1, 星期三: 2, 星期四: 3, 星期五: 4, 星期六: 5, 星期日: 6
+            const weeklySchedule = [
+                // 第一周模式：星期一李鑫，星期二鲁金林，星期三黄平平，星期四陈锐，星期五、六、日唐远艳
+                [
+                    OFFICERS[4], // 星期一: 李鑫
+                    OFFICERS[0], // 星期二: 鲁金林
+                    OFFICERS[1], // 星期三: 黄平平
+                    OFFICERS[2], // 星期四: 陈锐
+                    OFFICERS[3], // 星期五: 唐远艳
+                    OFFICERS[3], // 星期六: 唐远艳
+                    OFFICERS[3]  // 星期日: 唐远艳
+                ],
+                // 第二周模式：星期一鲁金林，星期二黄平平，星期三陈锐，星期四唐远艳，星期五、六、日李鑫
+                [
+                    OFFICERS[0], // 星期一: 鲁金林
+                    OFFICERS[1], // 星期二: 黄平平
+                    OFFICERS[2], // 星期三: 陈锐
+                    OFFICERS[3], // 星期四: 唐远艳
+                    OFFICERS[4], // 星期五: 李鑫
+                    OFFICERS[4], // 星期六: 李鑫
+                    OFFICERS[4]  // 星期日: 李鑫
+                ],
+                // 第三周模式：星期一黄平平，星期二陈锐，星期三唐远艳，星期四李鑫，星期五、六、日鲁金林
+                [
+                    OFFICERS[1], // 星期一: 黄平平
+                    OFFICERS[2], // 星期二: 陈锐
+                    OFFICERS[3], // 星期三: 唐远艳
+                    OFFICERS[4], // 星期四: 李鑫
+                    OFFICERS[0], // 星期五: 鲁金林
+                    OFFICERS[0], // 星期六: 鲁金林
+                    OFFICERS[0]  // 星期日: 鲁金林
+                ],
+                // 第四周模式：星期一陈锐，星期二唐远艳，星期三李鑫，星期四鲁金林，星期五、六、日黄平平
+                [
+                    OFFICERS[2], // 星期一: 陈锐
+                    OFFICERS[3], // 星期二: 唐远艳
+                    OFFICERS[4], // 星期三: 李鑫
+                    OFFICERS[0], // 星期四: 鲁金林
+                    OFFICERS[1], // 星期五: 黄平平
+                    OFFICERS[1], // 星期六: 黄平平
+                    OFFICERS[1]  // 星期日: 黄平平
+                ],
+                // 第五周模式：星期一唐远艳，星期二李鑫，星期三鲁金林，星期四黄平平，星期五、六、日陈锐
+                [
+                    OFFICERS[3], // 星期一: 唐远艳
+                    OFFICERS[4], // 星期二: 李鑫
+                    OFFICERS[0], // 星期三: 鲁金林
+                    OFFICERS[1], // 星期四: 黄平平
+                    OFFICERS[2], // 星期五: 陈锐
+                    OFFICERS[2], // 星期六: 陈锐
+                    OFFICERS[2]  // 星期日: 陈锐
+                ]
             ];
             
-            // 计算偏移量
-            const offset = Math.floor(daysDiff / 7) % OFFICERS.length;
+            // 根据周数差确定使用哪个排班模板（5周一个循环）
+            const scheduleIndex = weeksDiff % 5;
             
-            // 计算最终索引
-            let officerIndex = (officerMapping[baseIndex] + offset) % OFFICERS.length;
-            if (officerIndex < 0) officerIndex += OFFICERS.length;
-            
-            return OFFICERS[officerIndex];
+            // 根据星期几返回对应的民警
+            return weeklySchedule[scheduleIndex][dayOfWeek === 0 ? 6 : dayOfWeek - 1];
         }
         
-        // 获取辅警排班（基于天数差）
+        // 获取辅警排班（基于天数差，沿用原逻辑）
         function getAssistants(daysDiff) {
             // 每6天一个完整循环（2天正班 + 2天备勤 + 2天休息）
             const cycleDay = daysDiff % 6;
@@ -536,17 +526,17 @@
             try {
                 const { date, day } = dateInfo;
                 
-                // 计算天数差 - 民警使用9月1日作为起始
-                const officerDaysDiff = getDaysDiff(date, START_DATE);
+                // 计算天数差 - 值班领导使用9月1日作为起始
+                const leaderDaysDiff = getDaysDiff(date, START_DATE);
                 
                 // 计算天数差 - 辅警使用10月10日作为起始
                 const assistantDaysDiff = getDaysDiff(date, ASSISTANT_START_DATE);
                 
-                // 获取值班领导（根据本周六值班民警确定）
-                const leader = getLeader(date);
+                // 获取值班领导
+                const leader = getLeader(leaderDaysDiff);
                 
-                // 获取值班民警
-                const officer = getOfficer(officerDaysDiff, day);
+                // 获取值班民警（使用新排班逻辑）
+                const officer = getOfficer(date);
                 
                 // 获取辅警数据
                 const assistants = getAssistants(assistantDaysDiff);
@@ -642,7 +632,7 @@
                 document.getElementById('datePicker').addEventListener('change', function() {
                     const selectedDate = this.value;
                     const dateInfo = updateDate(selectedDate);
-updateDutyInfo(dateInfo);
+                    updateDutyInfo(dateInfo);
                 });
             } catch (error) {
                 console.error("页面初始化错误:", error);
