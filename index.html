@@ -276,7 +276,7 @@
     <div class="container">
         <div class="header">
             <h1>遵义市公安局播州分局枫香派出所</h1>
-            <div class="date-display" id="currentDate">2025年12月22日值班表</div>
+            <div class="date-display" id="currentDate">2026年1月5日值班表</div>
         </div>
         
         <div class="duty-table">
@@ -285,14 +285,14 @@
                     <div class="police-badge">警</div>
                     值班领导
                 </div>
-                <div class="duty-value" id="leader">郑周全 <span class="phone-number">18166931001</span></div>
+                <div class="duty-value" id="leader">谢道强 <span class="phone-number">18166933553</span></div>
             </div>
             <div class="duty-row">
                 <div class="duty-label">
                     <div class="police-badge">警</div>
                     值班民警
                 </div>
-                <div class="duty-value" id="officer">李鑫 <span class="phone-number">18166930638</span></div>
+                <div class="duty-value" id="officer">鲁金林 <span class="phone-number">15508526178</span></div>
             </div>
             <div class="duty-row">
                 <div class="duty-label">
@@ -312,7 +312,7 @@
     </div>
     
     <div class="controls">
-        <input type="date" class="date-selector" id="datePicker" value="2025-12-22">
+        <input type="date" class="date-selector" id="datePicker" value="2026-01-05">
         <button class="date-selector" onclick="showToday()">显示今日</button>
         <button class="fullscreen-btn" onclick="toggleFullScreen()">全屏显示</button>
     </div>
@@ -320,176 +320,248 @@
     <div class="footer">
         <p>系统时间: <span id="liveClock"></span></p>
         <p class="time-error" id="timeError" style="display: none;">时间获取失败，请检查设备时间设置</p>
-        <p>© 2025 遵义市公安局播州分局枫香派出所</p>
+        <p>© 2026 遵义市公安局播州分局枫香派出所</p>
         <p>为人民服务 · 保一方平安</p>
     </div>
 
     <script>
-        // 起始日期 - 2025年9月1日（周一）- 仅用于值班领导排班
-        const START_DATE = new Date(2025, 8, 1); // 月份从0开始，所以8代表9月
-        
-        // 辅警起始日期 - 2025年10月10日（周四）
-        const ASSISTANT_START_DATE = new Date(2025, 9, 10); // 月份从0开始，所以9代表10月
-        
-        // 新民警排班起始日期 - 2025年12月22日（周一）
-        const OFFICER_NEW_START_DATE = new Date(2025, 11, 22); // 月份从0开始，所以11代表12月
-        
-        // 值班领导数据
-        const LEADERS = [
-            { name: "李鑫", phone: "18166930638" },
-            { name: "姚龙科", phone: "15338528388" },
-            { name: "黄平平", phone: "18166930202" }
-        ];
-        
-        // 值班民警数据（新排班，5人轮换）
-        const OFFICERS = [
-            { name: "鲁金林", phone: "15508526178" },
-            { name: "黄平平", phone: "18166930202" },
-            { name: "陈锐", phone: "18166960609" },
-            { name: "唐远艳", phone: "18212188730" },
-            { name: "李鑫", phone: "18166930638" }
-        ];
-        
-        // 辅警分组数据
-        const ASSISTANT_GROUPS = [
-            { // 一组
-                name: "一组",
-                members: ["何庚云", "罗安宇", "熊仕东", "苏攀"]
-            },
-            { // 二组
-                name: "二组",
-                members: ["张佑强", "熊仕文", "肖启顺"]
-            },
-            { // 三组
-                name: "三组",
-                members: ["刘小涛", "潘腾辉", "郑旭华"]
-            }
-        ];
-        
-        // 计算从起始日期到目标日期的天数差
-        function getDaysDiff(targetDate, startDate) {
-            const start = new Date(startDate);
-            start.setHours(0, 0, 0, 0);
+        // 性能优化：使用单例模式避免重复计算
+        const DutyManager = (function() {
+            // 新的起始日期 - 2026年1月5日（周一）
+            const START_DATE = new Date(2026, 0, 5);
+            const ASSISTANT_START_DATE = new Date(2026, 0, 5);
             
-            const target = new Date(targetDate);
-            target.setHours(0, 0, 0, 0);
+            // 缓存对象
+            let cache = {
+                leaderCache: new Map(),
+                officerCache: new Map(),
+                assistantCache: new Map(),
+                scheduleCache: new Map()
+            };
             
-            // 计算相差的毫秒数
-            const diffTime = target - start;
-            
-            // 转换为天数
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            
-            return diffDays;
-        }
-        
-        // 获取值班领导（基于天数差，沿用原逻辑）
-        function getLeader(daysDiff) {
-            const weeksDiff = Math.floor(daysDiff / 7);
-            const leaderIndex = (weeksDiff % LEADERS.length + LEADERS.length) % LEADERS.length;
-            return LEADERS[leaderIndex];
-        }
-        
-        // 获取值班民警（新排班逻辑，5人轮换）
-        function getOfficer(targetDate) {
-            // 计算从新起始日期到目标日期的天数差
-            const daysDiff = getDaysDiff(targetDate, OFFICER_NEW_START_DATE);
-            
-            // 计算周数差
-            const weeksDiff = Math.floor(daysDiff / 7);
-            
-            // 获取目标日期的星期几（0-6，0代表星期日）
-            const dayOfWeek = targetDate.getDay();
-            
-            // 定义每周的排班模板
-            // 星期一: 0, 星期二: 1, 星期三: 2, 星期四: 3, 星期五: 4, 星期六: 5, 星期日: 6
-            const weeklySchedule = [
-                // 第一周模式：星期一李鑫，星期二鲁金林，星期三黄平平，星期四陈锐，星期五、六、日唐远艳
-                [
-                    OFFICERS[4], // 星期一: 李鑫
-                    OFFICERS[0], // 星期二: 鲁金林
-                    OFFICERS[1], // 星期三: 黄平平
-                    OFFICERS[2], // 星期四: 陈锐
-                    OFFICERS[3], // 星期五: 唐远艳
-                    OFFICERS[3], // 星期六: 唐远艳
-                    OFFICERS[3]  // 星期日: 唐远艳
-                ],
-                // 第二周模式：星期一鲁金林，星期二黄平平，星期三陈锐，星期四唐远艳，星期五、六、日李鑫
-                [
-                    OFFICERS[0], // 星期一: 鲁金林
-                    OFFICERS[1], // 星期二: 黄平平
-                    OFFICERS[2], // 星期三: 陈锐
-                    OFFICERS[3], // 星期四: 唐远艳
-                    OFFICERS[4], // 星期五: 李鑫
-                    OFFICERS[4], // 星期六: 李鑫
-                    OFFICERS[4]  // 星期日: 李鑫
-                ],
-                // 第三周模式：星期一黄平平，星期二陈锐，星期三唐远艳，星期四李鑫，星期五、六、日鲁金林
-                [
-                    OFFICERS[1], // 星期一: 黄平平
-                    OFFICERS[2], // 星期二: 陈锐
-                    OFFICERS[3], // 星期三: 唐远艳
-                    OFFICERS[4], // 星期四: 李鑫
-                    OFFICERS[0], // 星期五: 鲁金林
-                    OFFICERS[0], // 星期六: 鲁金林
-                    OFFICERS[0]  // 星期日: 鲁金林
-                ],
-                // 第四周模式：星期一陈锐，星期二唐远艳，星期三李鑫，星期四鲁金林，星期五、六、日黄平平
-                [
-                    OFFICERS[2], // 星期一: 陈锐
-                    OFFICERS[3], // 星期二: 唐远艳
-                    OFFICERS[4], // 星期三: 李鑫
-                    OFFICERS[0], // 星期四: 鲁金林
-                    OFFICERS[1], // 星期五: 黄平平
-                    OFFICERS[1], // 星期六: 黄平平
-                    OFFICERS[1]  // 星期日: 黄平平
-                ],
-                // 第五周模式：星期一唐远艳，星期二李鑫，星期三鲁金林，星期四黄平平，星期五、六、日陈锐
-                [
-                    OFFICERS[3], // 星期一: 唐远艳
-                    OFFICERS[4], // 星期二: 李鑫
-                    OFFICERS[0], // 星期三: 鲁金林
-                    OFFICERS[1], // 星期四: 黄平平
-                    OFFICERS[2], // 星期五: 陈锐
-                    OFFICERS[2], // 星期六: 陈锐
-                    OFFICERS[2]  // 星期日: 陈锐
-                ]
+            // 值班领导数据（按周轮换）
+            const LEADERS = [
+                { name: "谢道强", phone: "18166933553" },
+                { name: "黄平平", phone: "18166930202" },
+                { name: "李正焘", phone: "18089660539" }
             ];
             
-            // 根据周数差确定使用哪个排班模板（5周一个循环）
-            const scheduleIndex = weeksDiff % 5;
+            // 值班民警数据（按姓名映射到信息）
+            const OFFICERS_MAP = {
+                "鲁金林": { name: "鲁金林", phone: "15508526178" },
+                "陈锐": { name: "陈锐", phone: "18166960609" },
+                "黄平平": { name: "黄平平", phone: "18166930202" },
+                "李正焘": { name: "李正焘", phone: "18089660539" },
+                "唐远艳": { name: "唐远艳", phone: "18212188730" }
+            };
             
-            // 根据星期几返回对应的民警
-            return weeklySchedule[scheduleIndex][dayOfWeek === 0 ? 6 : dayOfWeek - 1];
-        }
-        
-        // 获取辅警排班（基于天数差，沿用原逻辑）
-        function getAssistants(daysDiff) {
-            // 每6天一个完整循环（2天正班 + 2天备勤 + 2天休息）
-            const cycleDay = daysDiff % 6;
+            // 第一周的值班安排
+            const FIRST_WEEK_SCHEDULE = [
+                "鲁金林", // 周一
+                "陈锐",   // 周二
+                "黄平平", // 周三
+                "李正焘", // 周四
+                "唐远艳", // 周五
+                "鲁金林", // 周六
+                "鲁金林"  // 周日
+            ];
             
-            // 根据循环天数确定状态
-            let fullTimeGroup, standbyGroup;
+            // 辅警分组数据
+            const ASSISTANT_GROUPS = [
+                { // 一组
+                    name: "一组",
+                    members: ["何庚云", "罗安宇", "熊仕东", "苏攀"]
+                },
+                { // 二组
+                    name: "二组",
+                    members: ["张佑强", "熊仕文", "肖启顺"]
+                },
+                { // 三组
+                    name: "三组",
+                    members: ["刘小涛", "潘腾辉", "郑旭华"]
+                }
+            ];
             
-            if (cycleDay < 2) {
-                // 10月10-11日模式：正班二组，备勤一组
-                fullTimeGroup = 1; // 二组
-                standbyGroup = 0;  // 一组
-            } else if (cycleDay < 4) {
-                // 10月12-13日模式：正班三组，备勤二组
-                fullTimeGroup = 2; // 三组
-                standbyGroup = 1;  // 二组
-            } else {
-                // 10月14-15日模式：正班一组，备勤三组
-                fullTimeGroup = 0; // 一组
-                standbyGroup = 2;  // 三组
+            // 计算从起始日期到目标日期的天数差（优化版本）
+            function getDaysDiff(targetDate, startDate) {
+                const cacheKey = `${targetDate.getTime()}-${startDate.getTime()}`;
+                if (cache.assistantCache.has(cacheKey)) {
+                    return cache.assistantCache.get(cacheKey);
+                }
+                
+                const start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                
+                const target = new Date(targetDate);
+                target.setHours(0, 0, 0, 0);
+                
+                const diffDays = Math.floor((target - start) / (1000 * 60 * 60 * 24));
+                cache.assistantCache.set(cacheKey, diffDays);
+                
+                return diffDays;
+            }
+            
+            // 获取值班领导（按周轮换，3周一个循环）
+            function getLeader(date) {
+                const cacheKey = date.toDateString();
+                if (cache.leaderCache.has(cacheKey)) {
+                    return cache.leaderCache.get(cacheKey);
+                }
+                
+                const daysDiff = getDaysDiff(date, START_DATE);
+                const weekDiff = Math.floor(daysDiff / 7);
+                const leaderIndex = weekDiff % 3;
+                const leader = LEADERS[leaderIndex] || LEADERS[0];
+                
+                cache.leaderCache.set(cacheKey, leader);
+                return leader;
+            }
+            
+            // 获取指定周的民警排班（优化版，使用循环而非递归）
+            function getOfficerSchedule(weekIndex) {
+                if (cache.scheduleCache.has(weekIndex)) {
+                    return cache.scheduleCache.get(weekIndex);
+                }
+                
+                // 第0周使用第一周的固定排班
+                if (weekIndex === 0) {
+                    cache.scheduleCache.set(0, [...FIRST_WEEK_SCHEDULE]);
+                    return FIRST_WEEK_SCHEDULE;
+                }
+                
+                // 从最近的已知周开始计算
+                let lastWeekSchedule;
+                if (cache.scheduleCache.has(weekIndex - 1)) {
+                    lastWeekSchedule = cache.scheduleCache.get(weekIndex - 1);
+                } else {
+                    // 如果缓存中没有前一周，则从第0周开始迭代计算
+                    lastWeekSchedule = [...FIRST_WEEK_SCHEDULE];
+                    for (let i = 1; i < weekIndex; i++) {
+                        lastWeekSchedule = calculateNextWeek(lastWeekSchedule);
+                        cache.scheduleCache.set(i, [...lastWeekSchedule]);
+                    }
+                }
+                
+                // 计算本周排班
+                const currentWeekSchedule = calculateNextWeek(lastWeekSchedule);
+                cache.scheduleCache.set(weekIndex, [...currentWeekSchedule]);
+                
+                // 限制缓存大小，防止内存泄漏
+                if (cache.scheduleCache.size > 20) {
+                    const keys = Array.from(cache.scheduleCache.keys()).sort();
+                    for (let i = 0; i < 5; i++) {
+                        cache.scheduleCache.delete(keys[i]);
+                    }
+                }
+                
+                return currentWeekSchedule;
+            }
+            
+            // 计算下一周的排班
+            function calculateNextWeek(lastWeekSchedule) {
+                const currentWeekSchedule = new Array(7);
+                currentWeekSchedule[0] = lastWeekSchedule[1]; // 周一 <- 上周二
+                currentWeekSchedule[1] = lastWeekSchedule[2]; // 周二 <- 上周三
+                currentWeekSchedule[2] = lastWeekSchedule[3]; // 周三 <- 上周四
+                currentWeekSchedule[3] = lastWeekSchedule[4]; // 周四 <- 上周五
+                currentWeekSchedule[4] = lastWeekSchedule[0]; // 周五 <- 上周一
+                currentWeekSchedule[5] = lastWeekSchedule[1]; // 周六 <- 上周二
+                currentWeekSchedule[6] = lastWeekSchedule[1]; // 周日 <- 上周二
+                return currentWeekSchedule;
+            }
+            
+            // 获取值班民警
+            function getOfficer(date) {
+                const cacheKey = date.toDateString();
+                if (cache.officerCache.has(cacheKey)) {
+                    return cache.officerCache.get(cacheKey);
+                }
+                
+                const daysDiff = getDaysDiff(date, START_DATE);
+                if (daysDiff < 0) {
+                    const officer = OFFICERS_MAP["鲁金林"];
+                    cache.officerCache.set(cacheKey, officer);
+                    return officer;
+                }
+                
+                const weekIndex = Math.floor(daysDiff / 7);
+                const dayOfWeek = date.getDay();
+                let dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                
+                const weekSchedule = getOfficerSchedule(weekIndex);
+                const officerName = weekSchedule[dayIndex];
+                const officer = OFFICERS_MAP[officerName] || OFFICERS_MAP["鲁金林"];
+                
+                cache.officerCache.set(cacheKey, officer);
+                return officer;
+            }
+            
+            // 获取辅警排班
+            function getAssistants(date) {
+                const cacheKey = date.toDateString() + '-assistants';
+                if (cache.assistantCache.has(cacheKey)) {
+                    return cache.assistantCache.get(cacheKey);
+                }
+                
+                const daysDiff = getDaysDiff(date, ASSISTANT_START_DATE);
+                if (daysDiff < 0) {
+                    const result = {
+                        fullTime: ASSISTANT_GROUPS[1],
+                        standby: ASSISTANT_GROUPS[0]
+                    };
+                    cache.assistantCache.set(cacheKey, result);
+                    return result;
+                }
+                
+                const cycleDay = daysDiff % 6;
+                let fullTimeGroup, standbyGroup;
+                
+                if (cycleDay < 2) {
+                    fullTimeGroup = 1;
+                    standbyGroup = 0;
+                } else if (cycleDay < 4) {
+                    fullTimeGroup = 2;
+                    standbyGroup = 1;
+                } else {
+                    fullTimeGroup = 0;
+                    standbyGroup = 2;
+                }
+                
+                const result = {
+                    fullTime: ASSISTANT_GROUPS[fullTimeGroup],
+                    standby: ASSISTANT_GROUPS[standbyGroup]
+                };
+                
+                cache.assistantCache.set(cacheKey, result);
+                return result;
+            }
+            
+            // 清理缓存（用于每日更新）
+            function clearCache() {
+                cache.leaderCache.clear();
+                cache.officerCache.clear();
+                cache.assistantCache.clear();
+                // 保留scheduleCache，因为排班规则不变
+            }
+            
+            // 获取所有值班信息
+            function getAllDutyInfo(date) {
+                return {
+                    leader: getLeader(date),
+                    officer: getOfficer(date),
+                    assistants: getAssistants(date)
+                };
             }
             
             return {
-                fullTime: ASSISTANT_GROUPS[fullTimeGroup],
-                standby: ASSISTANT_GROUPS[standbyGroup]
+                getAllDutyInfo,
+                clearCache
             };
-        }
+        })();
+        
+        // 全局变量
+        let dailyUpdateTimer = null;
+        let clockInterval = null;
         
         // 更新日期显示
         function updateDate(selectedDate = null) {
@@ -506,76 +578,55 @@
                 const day = date.getDate();
                 document.getElementById('currentDate').textContent = `${year}年${month}月${day}日值班表`;
                 
-                return {
-                    date: date,
-                    day: date.getDay()
-                };
+                return date;
             } catch (error) {
                 console.error("日期更新错误:", error);
                 document.getElementById('timeError').style.display = 'block';
-                const now = new Date();
-                return {
-                    date: now,
-                    day: now.getDay()
-                };
+                return new Date();
             }
         }
         
         // 更新值班信息
-        function updateDutyInfo(dateInfo) {
+        function updateDutyInfo(date) {
             try {
-                const { date, day } = dateInfo;
-                
-                // 计算天数差 - 值班领导使用9月1日作为起始
-                const leaderDaysDiff = getDaysDiff(date, START_DATE);
-                
-                // 计算天数差 - 辅警使用10月10日作为起始
-                const assistantDaysDiff = getDaysDiff(date, ASSISTANT_START_DATE);
-                
-                // 获取值班领导
-                const leader = getLeader(leaderDaysDiff);
-                
-                // 获取值班民警（使用新排班逻辑）
-                const officer = getOfficer(date);
-                
-                // 获取辅警数据
-                const assistants = getAssistants(assistantDaysDiff);
+                const dutyInfo = DutyManager.getAllDutyInfo(date);
                 
                 // 更新页面内容
-                document.getElementById('leader').innerHTML = `${leader.name} <span class="phone-number">${leader.phone}</span>`;
-                document.getElementById('officer').innerHTML = `${officer.name} <span class="phone-number">${officer.phone}</span>`;
-                document.getElementById('fullTimeAssistant').textContent = assistants.fullTime.members.join('、');
-                document.getElementById('standbyAssistant').textContent = assistants.standby.members.join('、');
+                document.getElementById('leader').innerHTML = `${dutyInfo.leader.name} <span class="phone-number">${dutyInfo.leader.phone}</span>`;
+                document.getElementById('officer').innerHTML = `${dutyInfo.officer.name} <span class="phone-number">${dutyInfo.officer.phone}</span>`;
+                document.getElementById('fullTimeAssistant').textContent = dutyInfo.assistants.fullTime.members.join('、');
+                document.getElementById('standbyAssistant').textContent = dutyInfo.assistants.standby.members.join('、');
                 
+                return true;
             } catch (error) {
                 console.error("更新值班信息错误:", error);
+                return false;
             }
         }
         
         // 显示今日值班信息
         function showToday() {
             try {
-                // 重置日期选择器为今日
                 const today = new Date();
                 const year = today.getFullYear();
                 const month = String(today.getMonth() + 1).padStart(2, '0');
                 const day = String(today.getDate()).padStart(2, '0');
                 document.getElementById('datePicker').value = `${year}-${month}-${day}`;
                 
-                const dateInfo = updateDate();
-                updateDutyInfo(dateInfo);
+                const date = updateDate();
+                updateDutyInfo(date);
+                setupDailyUpdate(); // 重新设置每日更新定时器
             } catch (error) {
                 console.error("显示今日错误:", error);
                 document.getElementById('timeError').style.display = 'block';
             }
         }
         
-        // 实时时钟
+        // 实时时钟（优化版，减少DOM操作）
         function updateClock() {
             try {
                 const now = new Date();
                 
-                // 验证日期对象是否有效
                 if (isNaN(now.getTime())) {
                     throw new Error("无效的日期对象");
                 }
@@ -585,13 +636,46 @@
                 const seconds = String(now.getSeconds()).padStart(2, '0');
                 
                 const timeStr = `${hours}:${minutes}:${seconds}`;
-                document.getElementById('liveClock').textContent = timeStr;
+                const clockElement = document.getElementById('liveClock');
+                
+                // 只有当时间变化时才更新DOM
+                if (clockElement.textContent !== timeStr) {
+                    clockElement.textContent = timeStr;
+                }
+                
                 document.getElementById('timeError').style.display = 'none';
             } catch (error) {
                 console.error("时间更新错误:", error);
                 document.getElementById('liveClock').textContent = "--:--:--";
                 document.getElementById('timeError').style.display = 'block';
             }
+        }
+        
+        // 设置每日0时01分自动更新
+        function setupDailyUpdate() {
+            // 清除现有定时器
+            if (dailyUpdateTimer) {
+                clearTimeout(dailyUpdateTimer);
+            }
+            
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 1, 0, 0); // 第二天0时01分
+            
+            const timeUntilUpdate = tomorrow.getTime() - now.getTime();
+            
+            // 设置定时器
+            dailyUpdateTimer = setTimeout(function() {
+                // 清理缓存并更新今日值班
+                DutyManager.clearCache();
+                showToday();
+                
+                // 设置下一次更新
+                setupDailyUpdate();
+            }, timeUntilUpdate);
+            
+            console.log(`下一次每日更新将在 ${tomorrow.toLocaleString()} 执行`);
         }
         
         // 全屏显示功能
@@ -612,34 +696,66 @@
         }
         
         // 页面加载时初始化
-        window.onload = function() {
+        function initPage() {
             try {
-                // 设置日期选择器默认值为今天
                 const today = new Date();
                 const year = today.getFullYear();
                 const month = String(today.getMonth() + 1).padStart(2, '0');
                 const day = String(today.getDate()).padStart(2, '0');
                 document.getElementById('datePicker').value = `${year}-${month}-${day}`;
                 
-                const dateInfo = updateDate();
-                updateDutyInfo(dateInfo);
+                const date = updateDate();
+                updateDutyInfo(date);
                 updateClock();
                 
-                // 设置时钟更新间隔
-                setInterval(updateClock, 1000);
+                // 设置时钟更新间隔（优化：降低更新频率）
+                if (clockInterval) clearInterval(clockInterval);
+                clockInterval = setInterval(updateClock, 2000); // 改为每2秒更新一次
+                
+                // 设置每日自动更新
+                setupDailyUpdate();
                 
                 // 添加日期选择事件监听
                 document.getElementById('datePicker').addEventListener('change', function() {
                     const selectedDate = this.value;
-                    const dateInfo = updateDate(selectedDate);
-                    updateDutyInfo(dateInfo);
+                    const date = updateDate(selectedDate);
+                    updateDutyInfo(date);
                 });
+                
+                // 页面可见性API，优化后台性能
+                document.addEventListener('visibilitychange', function() {
+                    if (document.hidden) {
+                        // 页面隐藏时，降低时钟更新频率
+                        if (clockInterval) clearInterval(clockInterval);
+                        clockInterval = setInterval(updateClock, 10000); // 每10秒更新一次
+                    } else {
+                        // 页面可见时，恢复更新频率
+                        if (clockInterval) clearInterval(clockInterval);
+                        clockInterval = setInterval(updateClock, 2000);
+                        updateClock(); // 立即更新一次
+                    }
+                });
+                
+                // 页面卸载时清理资源
+                window.addEventListener('beforeunload', function() {
+                    if (dailyUpdateTimer) clearTimeout(dailyUpdateTimer);
+                    if (clockInterval) clearInterval(clockInterval);
+                    DutyManager.clearCache();
+                });
+                
             } catch (error) {
                 console.error("页面初始化错误:", error);
                 document.getElementById('timeError').style.display = 'block';
                 document.getElementById('liveClock').textContent = "--:--:--";
             }
-        };
+        }
+        
+        // 页面加载完成后再初始化，避免阻塞渲染
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
     </script>
 </body>
 </html>
