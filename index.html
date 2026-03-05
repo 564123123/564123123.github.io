@@ -265,7 +265,7 @@
             // 值班民警映射（姓名 -> 电话）
             officersMap: {
                 '鲁金林': '15508526178',
-                '陈锐': '18166960609',
+                '田仁志': '19985981633',
                 '黄平平': '18166930202',
                 '李正焘': '18089660539',
                 '唐远艳': '18212188730'
@@ -274,7 +274,7 @@
             // 第一周民警排班（按周一到周日顺序，共7项）
             firstWeekOfficers: [
                 '鲁金林', // 周一
-                '陈锐',   // 周二
+                '田仁志', // 周二
                 '黄平平', // 周三
                 '李正焘', // 周四
                 '唐远艳', // 周五
@@ -528,40 +528,41 @@
 
                 // 时钟更新（2秒一次，页面隐藏时降低频率）
                 let clockInterval = setInterval(updateClock, 2000);
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) {
-                        clearInterval(clockInterval);
-                        clockInterval = setInterval(updateClock, 10000);
-                    } else {
-                        clearInterval(clockInterval);
-                        clockInterval = setInterval(updateClock, 2000);
-                        updateClock();
+                文档.添加事件监听器('页面可见性改变', () => {
+                    如果 (文档.隐藏) {
+                        清除定时器(时钟间隔);
+                        钟间隔 = 设置间隔(更新钟, 10000);
+                    } 否则 {
+                        清除定时器(时钟间隔);
+                        钟间隔 = 设置间隔(更新钟, 2000);
+                        更新时钟();
                     }
                 });
 
                 // 日期选择器监听
-                document.getElementById('datePicker').addEventListener('change', function(e) {
-                    const date = updateDateDisplay(e.target.value);
-                    updateUI(date);
+                文档.通过ID获取元素('datePicker').添加事件监听器('change', 函数(e) {
+                    常量 日期 = 更新日期显示(e.目标.值);
+                    更新用户界面(日期);
                 });
 
                 // 每日更新
-                setupDailyUpdate();
+                设置每日更新();
 
                 // 页面卸载清理定时器
-                window.addEventListener('beforeunload', () => {
-                    if (dailyTimer) clearTimeout(dailyTimer);
-                    if (clockInterval) clearInterval(clockInterval);
+                窗口.添加事件监听器('beforeunload', () => {
+                    如果 (每日定时器) 清除超时(每日定时器);
+                    如果 (时钟间隔) 清除间隔(时钟间隔);
                 });
             }
 
             // 启动
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
+            如果 (document.readyState === 'loading') {
+                文档.添加事件监听器('DOMContentLoaded', 初始化);
+            } 否则 {
+                初始化();
             }
         })();
-    </script>
-</body>
-</html>
+    </脚本>
+
+
+
